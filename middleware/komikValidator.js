@@ -15,9 +15,9 @@ const komikSchema = joi.object({
     author: joi.string().required()
 });
 
-function validateKomik(schema) {
+function validateBody(schema) {
     return (req, res, next) => {
-        const (eror, value) = schema.validate(req.body, 
+        const { error, value } = schema.validate(req.body, 
             { abortEarly: false,
                  convert: true,
                  allowUnknown: false
@@ -59,3 +59,5 @@ function validateParams(schema) {
     next();
     }
 }
+
+module.exports = {komikSchema, IdSchema, validateBody, validateParams};
