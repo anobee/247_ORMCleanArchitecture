@@ -1,78 +1,91 @@
-const db require('../config/models');
+const db = require('../config/models');
 
-async function getAllKomik(req, res) {
+// Wraps async handlers so errors are logged and returned consistently
+const handle = (label, fn) => async (req, res) => {
     try {
-        const komiks = await db.Komik.findAll();
-        res.json(komiks);
+        await fn(req, res);
     } catch (error) {
-        console.error('Error fetching komiks:', error);
+        console.error(`Error ${label}:`, error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-}
+};
 
-async function getKomikById(req, res) {
-    const { id } = req.params;
-    try {
-        const komik = await db.Komik.findByPk(id);
-        if (!komik) {
-            return res.status(404).json({ error: 'Komik not found' });
-        }
-        res.json(komik);
-    } catch (error) {
-        console.error('Error fetching komik:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-}
+// Keep only fields that were actually sent, so missing fields don't overwrite data
+const pickDefined = (source, fields) =>
+    fields.reduce((acc, key) => {
+        if (source[key] !== undefined) acc[key] = source[key];
+        return acc;
+    }, {});
 
-async function createKomik(req, res) {
-    const { title, description, author } = req.body;
-    try {
-        const newKomik = await db.Komik.create({ title, description, author });
-        res.status(201).json(newKomik);
-    } catch (error) {
-        console.error('Error creating komik:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-}
+const FIELDS = ['title', 'description', 'author'];
 
-async function updateKomik(req, res) {
-    const { id } = req.params;
-    const { title, description, author } = req.body;
-    try {
-        const komik = await db.Komik.findByPk(id);
-        if (!komik) {
-            return res.status(404).json({ error: 'Komik not found' });
-        }
-        komik.title = title;
-        komik.description = description;
-        komik.author = author;
-        await komik.save();
-        res.status(200).json(komik);
-    } catch (error) {
-        console.error('Error updating komik:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-}
+const getAllKomik = handle('fetching komiks', async (req, res) => {
+    // Pagination: ?page=1&limit=20 (limit capped at 100)
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+    const offset = (page - 1) * limit;
 
-async function deleteKomik(req, res) {
-    const { id } = req.params;
-    try {
-        const komik = await db.Komik.findByPk(id);
-        if (!komik) {
-            return res.status(404).json({ error: 'Komik not found' });
-        }
-        await komik.destroy();
-        res.status(200).json({ message: 'Komik deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting komik:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+    const { count, rows } = await db.Komik.findAndCountAll({
+        limit,
+        offset,
+        order: [['id', 'ASC']],
+    });
+
+    res.json({
+        data: rows,
+        pagination: { page, limit, total: count, totalPages: Math.ceil(count / limit) },
+    });
+});
+
+const getKomikById = handle('fetching komik', async (req, res) => {
+    const komik = await db.Komik.findByPk(req.params.id);
+    if (!komik) {
+        return res.status(404).json({ error: 'Komik not found' });
     }
-}
+    res.json(komik);
+});
+
+const createKomik = handle('creating komik', async (req, res) => {
+    const data = pickDefined(req.body, FIELDS);
+
+    if (!data.title || typeof data.title !== 'string' || !data.title.trim()) {
+        return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const newKomik = await db.Komik.create(data);
+    res.status(201).json(newKomik);
+});
+
+const updateKomik = handle('updating komik', async (req, res) => {
+    const komik = await db.Komik.findByPk(req.params.id);
+    if (!komik) {
+        return res.status(404).json({ error: 'Komik not found' });
+    }
+
+    const data = pickDefined(req.body, FIELDS);
+
+    if ('title' in data && (typeof data.title !== 'string' || !data.title.trim())) {
+        return res.status(400).json({ error: 'Title cannot be empty' });
+    }
+
+    await komik.update(data);
+    res.status(200).json(komik);
+});
+
+const deleteKomik = handle('deleting komik', async (req, res) => {
+    const komik = await db.Komik.findByPk(req.params.id);
+    if (!komik) {
+        return res.status(404).json({ error: 'Komik not found' });
+    }
+
+    await komik.destroy();
+    res.status(200).json({ message: 'Komik deleted successfully' });
+});
 
 module.exports = {
     getAllKomik,
     getKomikById,
     createKomik,
     updateKomik,
-    deleteKomik
+    deleteKomik,
 };
