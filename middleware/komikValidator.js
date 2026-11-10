@@ -17,10 +17,24 @@ const komikSchema = joi.object({
 
 function validateKomik(schema) {
     return (req, res, next) => {
-        const { error } = schema.validate(req.body, { abortEarly: false });
-        if (error) {
-            const errorDetails = error.details.map(detail => detail.message);
-            return erorResponse(res, 'Validation Error', 400, errorDetails);
+        const (eror, value) = schema.validate(req.body, 
+            { abortEarly: false,
+                 convert: true,
+                 allowUnknown: false
+            }); 
+
+        if (eror) {
+            return erorResponse(
+                res, 'Validation Error',
+                400,
+                eror.details.map((item) => ({
+                    field: item.path.join('.'),
+                    message: item.message
+                }))
+            );
         }
+
+        req.body = value;
         next();
     };
+}
