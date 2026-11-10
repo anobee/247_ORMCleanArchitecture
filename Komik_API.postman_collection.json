@@ -1,0 +1,122 @@
+{
+  "info": {
+    "_postman_id": "c1f7b8e2-9b6e-4c7b-99f1-247ormclean01",
+    "name": "Komik API (Clean Architecture)",
+    "description": "Koleksi request Postman untuk REST API Komik dengan prefix /api/komik",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "1. Create Komik (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"One Piece\",\n  \"description\": \"Petualangan Monkey D. Luffy mencari harta karun One Piece\",\n  \"author\": \"Eiichiro Oda\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/komik",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "komik"]
+        }
+      }
+    },
+    {
+      "name": "2. Get All Komik (GET)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/komik?page=1&limit=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "komik"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Get Komik by ID (GET)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/komik/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "komik", "1"]
+        }
+      }
+    },
+    {
+      "name": "4. Update Komik (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"One Piece: Wano Arc\",\n  \"description\": \"Pertempuran Onigashima melawan Kaido\",\n  \"author\": \"Eiichiro Oda\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/komik/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "komik", "1"]
+        }
+      }
+    },
+    {
+      "name": "5. Delete Komik (DELETE)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/komik/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "komik", "1"]
+        }
+      }
+    }
+  ]
+}
