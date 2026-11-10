@@ -38,3 +38,24 @@ function validateKomik(schema) {
         next();
     };
 }
+
+function validateParams(schema) {
+    return (req, res, next) => {
+        const { id } = req.params;
+        const { error, value } = schema.validate({ id });
+
+        if (error) {
+            return erorResponse(
+                res, 'Validation Error',    
+                400,
+                error.details.map((item) => ({
+                field: item.path.join('.'),
+                message: item.message
+            }))
+        );
+
+    }
+    req.params = value;
+    next();
+    }
+}
