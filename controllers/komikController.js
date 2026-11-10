@@ -1,4 +1,4 @@
-const db require('../config/models');\
+const db require('../config/models');
 
 async function getAllKomik(req, res) {
     try {
