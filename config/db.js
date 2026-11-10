@@ -1,4 +1,4 @@
-const db = require('./models');
+import db from './models/index.js';
 
 async function connectDataBase() {
     try {
@@ -7,10 +7,9 @@ async function connectDataBase() {
 
         await db.sequelize.sync({ alter: true });
         console.log('Database synchronized successfully.');
-    } 
-    catch (error) {
+    } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
 }
 
-module.exports = connectDataBase;
+export default connectDataBase;
