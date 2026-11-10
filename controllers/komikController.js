@@ -1,6 +1,6 @@
-const db = require('../config/models');
+import db from '../models/index.js';
 
-// Wraps async handlers so errors are logged and returned consistently
+// Membungkus handler async agar error dicatat dan dikembalikan secara konsisten
 const handle = (label, fn) => async (req, res) => {
     try {
         await fn(req, res);
@@ -10,7 +10,7 @@ const handle = (label, fn) => async (req, res) => {
     }
 };
 
-// Keep only fields that were actually sent, so missing fields don't overwrite data
+// Ambil hanya field yang dikirim, agar field yang kosong tidak menimpa data lama
 const pickDefined = (source, fields) =>
     fields.reduce((acc, key) => {
         if (source[key] !== undefined) acc[key] = source[key];
@@ -20,7 +20,7 @@ const pickDefined = (source, fields) =>
 const FIELDS = ['title', 'description', 'author'];
 
 const getAllKomik = handle('fetching komiks', async (req, res) => {
-    // Pagination: ?page=1&limit=20 (limit capped at 100)
+    // Pagination: ?page=1&limit=20 (limit maksimal 100)
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
     const offset = (page - 1) * limit;
@@ -82,7 +82,7 @@ const deleteKomik = handle('deleting komik', async (req, res) => {
     res.status(200).json({ message: 'Komik deleted successfully' });
 });
 
-module.exports = {
+export {
     getAllKomik,
     getKomikById,
     createKomik,
